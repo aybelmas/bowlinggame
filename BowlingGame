@@ -1,0 +1,89 @@
+public class BowlingGame {
+
+    private static final char STRIKE = 'X';
+    private static final char SPARE = '/';
+    private static final char MISS = '-';
+
+    public static int calculateBowlingScore(String rolls) {
+        if (rolls == null || rolls.isEmpty()) {
+            throw new IllegalArgumentException("Input rolls cannot be null or empty");
+        }
+
+        int score = 0;
+        int rollIndex = 0;
+
+        for (int frame = 1; frame <= 10; frame++) {
+            char currentRoll = rolls.charAt(rollIndex);
+
+            if (isStrike(currentRoll)) {
+                score += 10 + getStrikeBonus(rolls, rollIndex + 1);
+                rollIndex += 1;
+            } else if (isSpare(currentRoll)) {
+                score += 10 + getSpareBonus(rolls, rollIndex + 1);
+                rollIndex += 2;
+            } else {
+                score += getFrameScore(currentRoll, rolls.charAt(rollIndex + 1));
+                rollIndex += 2;
+            }
+
+            if (rollIndex >= rolls.length()) {
+                break;  // To avoid going out of bounds
+            }
+        }
+
+        return score;
+    }
+
+    private static boolean isStrike(char roll) {
+        return roll == STRIKE;
+    }
+
+    private static boolean isSpare(char roll) {
+        return roll == SPARE;
+    }
+
+    private static int getStrikeBonus(String rolls, int nextIndex) {
+        int bonus = 0;
+        for (int i = 0; i < 2 && nextIndex < rolls.length(); i++, nextIndex++) {
+            bonus += getFrameScore(rolls.charAt(nextIndex), '0');  // Use '0' for the second roll of the next frame
+        }
+        return bonus;
+    }
+
+    private static int getSpareBonus(String rolls, int nextIndex) {
+        if (nextIndex < rolls.length()) {
+            return getFrameScore(rolls.charAt(nextIndex), '0');  // Use '0' for the next roll
+        } else {
+            return 0;
+        }
+    }
+
+    private static int getFrameScore(char roll1, char roll2) {
+        int score1 = getRollScore(roll1);
+        int score2 = getRollScore(roll2);
+        return score1 + score2;
+    }
+
+    private static int getRollScore(char roll) {
+        if (Character.isDigit(roll)) {
+            return Character.getNumericValue(roll);
+        } else if (roll == MISS) {
+            return 0;
+        } else if (roll == STRIKE || roll == SPARE) {
+            return 10;
+        } else {
+            throw new IllegalArgumentException("Invalid roll character: " + roll);
+        }
+    }
+
+    public static void main(String[] args) {
+        // Example usage
+        String test_case_1 = "XXXXXXXXXXXX";  // Expected: 300
+        String test_case_2 = "9-9-9-9-9-9-9-9-9-9-";  // Expected: 90
+        String test_case_3 = "5/5/5/5/5/5/5/5/5/5/5";  // Expected: 150
+
+        System.out.println("Score du Test Case 1 : " + calculateBowlingScore(test_case_1));
+        System.out.println("Score du Test Case 2 : " + calculateBowlingScore(test_case_2));
+        System.out.println("Score du Test Case 3 : " + calculateBowlingScore(test_case_3));
+    }
+}
